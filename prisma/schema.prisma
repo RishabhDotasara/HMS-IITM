@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Hostel{
+  hostelId String @id @default(uuid())
+  hostelName String @unique
+  hostelFor String //gender
+  students User[]
+  singleRooms Int 
+  doubleRooms Int
+  tripleRooms Int
+  allotmentStatus Boolean @default(false) 
+  rooms Room[]
+  wings Wing[]
+
+  appliedStudents Allotment[] @relation("AppliedHostel")
+ 
+}
+
+model Wing {
+  wingId String @id @default(uuid())
+  wingName String
+  rooms Room[]
+  hostelId String @default("")
+  hostel Hostel @relation(fields: [hostelId], references: [hostelId])
+
+  applicants Allotment[] @relation("AppliedWing")
+}
+
+model Room {
+  roomId String @id @default(uuid())
+  roomNo String
+  capacity Int
+  wingId String
+  wing Wing @relation(fields: [wingId], references: [wingId])
+  hostelId String @default("")
+  hostel Hostel @relation(fields: [hostelId], references: [hostelId])
+  students User[]
+
+  appliedStudents Allotment[] @relation("AppliedRoom")
+}
+
+model User {
+  userId String @id @default(uuid()) 
+  username String @default("Username")
+  rollNo String @unique()
+  email String 
+  password String 
+  isSuperUser Boolean @default(false)
+  hostelId String? @default("")
+  hostel Hostel? @relation(fields: [hostelId], references: [hostelId])
+  roomId String? @default("")
+  room Room? @relation(fields: [roomId], references: [roomId])
+  applications Allotment[] @relation("Applicant")
+}
+
+model Allotment{
+  requestId String @id @default(uuid())
+  userId String
+  user User @relation("Applicant",fields: [userId], references: [userId])
+  hostelId String
+  hostel Hostel @relation("AppliedHostel",fields: [hostelId], references: [hostelId])
+  roomId String
+  room Room @relation("AppliedRoom",fields: [roomId], references: [roomId])
+  wingId String
+  wing Wing @relation("AppliedWing",fields: [wingId], references: [wingId])
+  status Boolean @default(false)
+}
+
