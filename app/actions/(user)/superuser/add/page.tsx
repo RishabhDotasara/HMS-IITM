@@ -62,7 +62,7 @@ import {
 } from "@/common/modelsSchema";
 import { cn } from "@/lib/utils";
 
-export default function ProfileForm() {
+export default function SuperUserCreation() {
   // ...
 
   const form = useForm<SuperUserAdd>({
@@ -121,7 +121,7 @@ export default function ProfileForm() {
                     <SelectContent>
                       {users && users.map((user:any)=>{
 
-                       return (<SelectItem value={user.userId}>{user.username}</SelectItem>)
+                       return (<SelectItem value={user.userId} key={user.userId}>{user.username}</SelectItem>)
                       })}
                       {users.length == 0 && <SelectItem value="null">All are superusers.</SelectItem>}
                      

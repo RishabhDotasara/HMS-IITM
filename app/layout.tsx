@@ -34,8 +34,8 @@ export default function RootLayout({
             enableSystem={true}
             disableTransitionOnChange={false}
           >
-            <RecoilRoot>
-            
+        <RecoilRoot>
+          
           {children}
         </RecoilRoot>
         <Toaster/>

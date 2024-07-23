@@ -11,12 +11,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-export default function page() {
+export default function Page() {
   const [request, setRequest] = useState<any>();
   const {toast} = useToast();
   const router = useRouter()
-  useEffect(() => {
-    //look into the type of dat, after all the setup.
+
+  const renderRequests = ()=>{
     getRequests(localStorage.getItem("token") || "").then((data: any) => {
       if (data?.status == 401)
       {
@@ -31,9 +31,14 @@ export default function page() {
       }
       else
       {
+        console.log(data);
         setRequest(data)
       }
     });
+  }
+  useEffect(() => {
+    //look into the type of dat, after all the setup.
+    renderRequests();
   }, []);
 
   const deleteReq= () => {
@@ -51,6 +56,7 @@ export default function page() {
       else 
       {
         toast({title:"Request Deleted successfully!"})
+        renderRequests();
       }
     })
   }

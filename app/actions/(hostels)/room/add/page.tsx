@@ -118,7 +118,7 @@ export default function ProfileForm() {
                     <SelectContent>
                       {hostels.map((hostel:any)=>{
 
-                       return (<SelectItem value={hostel.hostelId}>{hostel.hostelName}</SelectItem>)
+                       return (<SelectItem value={hostel.hostelId} key={hostel.hostelId}>{hostel.hostelName}</SelectItem>)
                       })}
                      
                     </SelectContent>
@@ -143,7 +143,7 @@ export default function ProfileForm() {
                     <SelectContent>
                       {wings.map((wing:any)=>{
 
-                       return (<SelectItem value={wing.wingId}>{wing.wingName}</SelectItem>)
+                       return (<SelectItem value={wing.wingId} key={wing.wingId}>{wing.wingName}</SelectItem>)
                       })}
                      
                     </SelectContent>

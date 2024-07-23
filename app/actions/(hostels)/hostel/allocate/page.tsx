@@ -34,10 +34,20 @@ import {
   createAllotmentRequest,
   getHostelsbyGender,
   getRoomsbyHostelandWing,
+  getRoomsbyHostelandWingandCapacity,
   getUserInfo,
+  getUsers,
+  getUsersWithoutRequest,
   getWingsbyHostel,
 } from "@/lib/actions/dbActions";
 import { AllotmentRequestSchema } from "@/common/allotmentRequestSchema";
+
+/**
+ * Represents a profile form component.
+ * This component is responsible for rendering a form for creating a new request.
+ * It includes fields for selecting gender, hostel, wing, room type, and roommates.
+ * The form data is submitted to create an allotment request.
+ */
 
 export default function ProfileForm() {
   // ...
@@ -61,31 +71,52 @@ export default function ProfileForm() {
   const [wings, setWings] = useState([]);
   const [wingId, setWing] = useState("");
   const [rooms, setRooms] = useState([]);
+  const [roomType, setRoomType] = useState(0);
+  const [roomates, setRoomates] = useState([]); // lists of users to chose from as roomates
 
   useEffect(()=>{
     getUserInfo(localStorage.getItem("token") || "")
     .then((data: any) => {
       setUser(data);
     });
+
   },[])
+
+  useEffect(()=>{
+    user && getUsers()
+    .then((data:any)=>{
+      const filtered_users = data.filter((useri:any)=>{
+        if (useri.request == null && useri.userId != user.userId)
+        {
+          return useri;
+        }
+      })
+      setRoomates(filtered_users);
+    })
+  },[user])
 
   useEffect(() => {
     getHostelsbyGender(gender).then((data: any) => {
-      setHostels(data);
+      const alloting_hostels = data.filter((hostel:any)=>hostel.allotmentStatus==true);
+      setHostels(alloting_hostels);
     });
     console.log(hostels);
   }, [gender]);
+
   useEffect(() => {
     getWingsbyHostel(hostelId).then((data: any) => {
       setWings(data);
     });
   }, [hostelId]);
+
   useEffect(() => {
-    getRoomsbyHostelandWing(wingId).then((data: any) => {
+    getRoomsbyHostelandWingandCapacity(wingId, roomType).then((data: any) => {
       console.log(wingId);
-      setRooms(data);
+      //filter the eligible rooms
+      const eligible_rooms = data.filter((room:any)=>room.appliedStudents.length < room.capacity);
+      setRooms(eligible_rooms || []);
     });
-  }, [wingId]);
+  }, [roomType]);
 
   function onSubmit(values: z.infer<typeof AllotmentRequestSchema>) {
     // Do something with the form values.
@@ -158,13 +189,14 @@ export default function ProfileForm() {
                       <SelectValue placeholder="Hostel" />
                     </SelectTrigger>
                     <SelectContent>
-                      {hostels.map((hostel: any) => {
+                      {hostels.length > 0 && hostels.map((hostel: any) => {
                         return (
-                          <SelectItem value={hostel.hostelId}>
+                          <SelectItem value={hostel.hostelId} key={hostel.hostelId}>
                             {hostel.hostelName}
                           </SelectItem>
                         );
                       })}
+                      {hostels.length == 0 && <SelectItem value="No one">No hostel is accepting.</SelectItem>}
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -189,13 +221,14 @@ export default function ProfileForm() {
                       <SelectValue placeholder="Wing" />
                     </SelectTrigger>
                     <SelectContent>
-                      {wings.map((wing: any) => {
+                      {wings.length > 0 && wings.map((wing: any) => {
                         return (
-                          <SelectItem value={wing.wingId}>
+                          <SelectItem value={wing.wingId} key={wing.wingId}>
                             {wing.wingName}
                           </SelectItem>
                         );
                       })}
+                      {wings.length == 0 && <SelectItem value="No one">Please select a hostel first.</SelectItem>}
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -206,23 +239,27 @@ export default function ProfileForm() {
           />
           <FormField
             control={form.control}
-            name="roomId"
+            name="roomType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Room</FormLabel>
+                <FormLabel>Room Type</FormLabel>
                 <FormControl>
-                  <Select onValueChange={(e: string) => field.onChange(e)}>
+                  <Select onValueChange={(e: string) => {field.onChange(e), setRoomType(e)}}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Room" />
                     </SelectTrigger>
                     <SelectContent>
-                      {rooms.map((room: any) => {
-                        return (
-                          <SelectItem value={room.roomId}>
-                            {room.roomNo}
+                      
+                          <SelectItem value="1">
+                            1 Seater
                           </SelectItem>
-                        );
-                      })}
+                          <SelectItem value="2">
+                            2 Seater
+                          </SelectItem>
+                          <SelectItem value="3">
+                            3 Seater
+                          </SelectItem>
+                       
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -230,7 +267,94 @@ export default function ProfileForm() {
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /><FormField
+          control={form.control}
+          name="roomId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Room</FormLabel>
+              <FormControl>
+                <Select onValueChange={(e: string) => field.onChange(e)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Room" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {rooms.length > 0 && rooms.map((room: any) => {
+                      return (
+                        <SelectItem value={room.roomId} key={room.roomId}>
+                          {room.roomNo}
+                        </SelectItem>
+                      );
+                    })}
+                    {rooms.length == 0 && <SelectItem value="No one">Please select a wing first.</SelectItem>}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+          {(roomType == 2 || roomType == 3) && <FormField
+            control={form.control}
+            name="roommate1"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Roommate 1</FormLabel>
+                <FormControl>
+                  <Select onValueChange={(e: string) => field.onChange(e)}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="User" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {roomates.length > 0 && roomates.map((roommate: any) => {
+                        return (
+                          <SelectItem value={roommate.userId} key={roommate.userId}>
+                            <h3>{roommate.username}</h3>
+                            <h4 className="text-[10px] text-gray-300">{roommate.rollNo}</h4>
+                          </SelectItem>
+                        );
+                      })}
+                      {roomates.length == 0 && <SelectItem value="No one">Loading Users</SelectItem>}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+
+                <FormMessage />
+              </FormItem>
+            )}
+          />}
+          
+          {roomType == 3 && <FormField
+            control={form.control}
+            name="roommate2"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Roommate 2</FormLabel>
+                <FormControl>
+                  <Select onValueChange={(e: string) => field.onChange(e)}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="User" />
+                    </SelectTrigger>
+                    <SelectContent>
+                    {roomates.length > 0 && roomates.map((roommate: any) => {
+                        return (
+                          <SelectItem value={roommate.userId} key={roommate.userId}>
+                            <h3>{roommate.username}</h3>
+                            <h4 className="text-[10px] text-gray-300">{roommate.rollNo}</h4>
+                          </SelectItem>
+                        );
+                      })}
+                      
+                      {roomates.length == 0 && <SelectItem value="No one">Loading Users</SelectItem>}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+
+                <FormMessage />
+              </FormItem>
+            )}
+          />}
           <Button type="submit" disabled={loading} className="w-full">
             {loading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
             Create

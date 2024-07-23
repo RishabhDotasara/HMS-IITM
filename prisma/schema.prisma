@@ -21,10 +21,10 @@ model Hostel{
   singleRooms Int 
   doubleRooms Int
   tripleRooms Int
-  allotmentStatus Boolean @default(false) 
+  allotmentStatus Boolean @default(false) //this is basically if the hostel is accepting requests or not, could change it in further updates.
   rooms Room[]
   wings Wing[]
-
+  allotmentDone Boolean @default(false)
   appliedStudents Allotment[] @relation("AppliedHostel")
  
 }
@@ -47,9 +47,9 @@ model Room {
   wing Wing @relation(fields: [wingId], references: [wingId])
   hostelId String @default("")
   hostel Hostel @relation(fields: [hostelId], references: [hostelId])
-  students User[]
-
+  students User[] @relation("currentRoom")//these are the people in this room right now.
   appliedStudents Allotment[] @relation("AppliedRoom")
+  
 }
 
 model User {
@@ -62,14 +62,16 @@ model User {
   hostelId String? @default("")
   hostel Hostel? @relation(fields: [hostelId], references: [hostelId])
   roomId String? @default("")
-  room Room? @relation(fields: [roomId], references: [roomId])
-  applications Allotment[] @relation("Applicant")
+  room Room? @relation("currentRoom",fields: [roomId], references: [roomId]) //this is the current room
+  requestId String? 
+  request Allotment? @relation("Applicants", fields: [requestId], references: [requestId])
+  
 }
 
 model Allotment{
   requestId String @id @default(uuid())
-  userId String
-  user User @relation("Applicant",fields: [userId], references: [userId])
+  creatorUserId String
+  users User[] @relation("Applicants")
   hostelId String
   hostel Hostel @relation("AppliedHostel",fields: [hostelId], references: [hostelId])
   roomId String

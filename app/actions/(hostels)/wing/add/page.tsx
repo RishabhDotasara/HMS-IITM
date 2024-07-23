@@ -99,7 +99,7 @@ export default function ProfileForm() {
                     <SelectContent>
                       {hostels.map((hostel:any)=>{
 
-                       return (<SelectItem value={hostel.hostelId}>{hostel.hostelName}</SelectItem>)
+                       return (<SelectItem value={hostel.hostelId} key={hostel.hostelId}>{hostel.hostelName}</SelectItem>)
                       })}
                      
                     </SelectContent>

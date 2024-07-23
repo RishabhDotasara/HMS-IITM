@@ -28,7 +28,7 @@ function CustomCard({title,content}:{title:string,content:string}){
 
 }
 
-export default function page() {
+export default function Page() {
 
   const [user, setUser] = useState<any>();
   const [userInfo, setUserInfo] = useState<any>([])

@@ -56,6 +56,7 @@ import jwt from "jsonwebtoken";
 import { verifyToken } from "@/lib/actions/dbActions";
 import { useToast } from "./ui/use-toast";
 import adminAtom from "@/states/adminAtom";
+import PageLoader from "./Loader";
 
 function CustomLink({
   children,
@@ -93,6 +94,7 @@ export default function Navbar() {
         else 
         {
           toast({title:"Session Expired!", description:"Please login again!"})
+          router.push("/auth/signin");
         }
       });
     } else {
@@ -112,6 +114,7 @@ export default function Navbar() {
     <div className="fixed right-0 top-0 pt-5 pr-10 flex items-center justify-end gap-3 w-full backdrop-blur-lg">
       {/* user profile */}
       <ModeToggle />
+      <PageLoader className="w-full min-h-screen fixed top-0 left-0 flex items-center justify-center backdrop-blur-lg bg-white z-20"/>
       {logged && (
         <DropdownMenu>
           <DropdownMenuTrigger>
@@ -127,23 +130,13 @@ export default function Navbar() {
               <Home />
               Home
             </CustomLink>
-            <CustomLink onClick={() => router.push("/actions/profile")}>
-              <Edit />
-              Edit Profile
-            </CustomLink>
-
+          
             <CustomLink onClick={() => router.push("/actions/hostel/hostels")}>
               <Building />
               Hostels
             </CustomLink>
             <CustomLink onClick={() => router.push("/actions/hostel/requests")}>
               <Building2 /> Hostel Allotment
-            </CustomLink>
-
-            <DropdownMenuSeparator />
-            <CustomLink>
-              <Settings />
-              Change Password
             </CustomLink>
 
             {isAdmin && <><DropdownMenuSeparator />
