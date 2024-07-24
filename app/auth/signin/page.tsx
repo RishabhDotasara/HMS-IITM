@@ -26,6 +26,7 @@ import loginAtom from "@/states/loginAtom";
 import Navbar from "@/components/Navbar";
 import { loginUser } from "@/lib/actions/dbActions";
 import loadingAtom from "@/states/loadingAtom";
+import { Loader, Loader2 } from "lucide-react";
 
 export default function ProfileForm() {
   const form = useForm<SignInType>({
@@ -52,17 +53,20 @@ export default function ProfileForm() {
             setLogged(true);
             toast({title:"Signin Successful!", description:"Welcome to the App."});
             localStorage.setItem('token',res.token);
+            setLoading(false);
             router.push("/actions/home");
           }
           else 
           {
             toast({title:res.message});
+            setLoading(false);
           }
         })
     } catch (err) {
       console.log(err);
+      setLoading(false);
     }
-    setLoading(false);
+    
   };
 
   // ...
@@ -113,7 +117,7 @@ export default function ProfileForm() {
           />
           <Button type="submit" className="w-full" disabled={loading}>
             SignIn
-            
+            {loading && <Loader2 className="animate-spin text-sm ml-3"/>}
           </Button>
         </form>
       </Form>

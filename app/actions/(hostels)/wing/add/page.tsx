@@ -20,7 +20,7 @@ import Link from "next/link";
 import { toast, useToast } from "@/components/ui/use-toast";
 import { useEffect, useState } from "react";
 import { ButtonLoading } from "@/components/ui/LoadingButton";
-import { ArrowRight, Loader } from "lucide-react";
+import { ArrowRight, Loader, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRecoilState } from "recoil";
 import loginAtom from "@/states/loginAtom";
@@ -52,10 +52,19 @@ export default function ProfileForm() {
     // ✅ This will be type-safe and validated.
     setLoading(true);
     addWing(values).then((res:any)=>{
-      toast({title:res});
+      if (res?.status == 200)
+      {
+        toast({title:"Wing Added!"});
+        
+        setLoading(false);
+      }
+      else 
+      {
+        toast({title:res?.message});
+        setLoading(false);
+      }
       // router.push("/actions/")
     })
-    setLoading(false);
   }
 
   useEffect(()=>{
@@ -67,7 +76,7 @@ export default function ProfileForm() {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-2 w-4/5 md:w-1/4 outline-1 p-3"
+          className="space-y-2 w-4/5 md:w-1/4 outline-1 p-3 mb-36"
         >
           <h3 className="text-center text-2xl font-bold">Add Wing</h3>
 
@@ -113,8 +122,8 @@ export default function ProfileForm() {
          
 
           <Button type="submit" disabled={loading} className="w-full">
-            {loading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
             Add
+            {loading && <Loader2 className="animate-spin ml-3"/>}
             
           </Button>
         </form>

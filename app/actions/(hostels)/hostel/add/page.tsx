@@ -20,7 +20,7 @@ import Link from "next/link";
 import { toast, useToast } from "@/components/ui/use-toast";
 import { useEffect, useState } from "react";
 import { ButtonLoading } from "@/components/ui/LoadingButton";
-import { ArrowRight, Loader } from "lucide-react";
+import { ArrowRight, Loader, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRecoilState } from "recoil";
 import loginAtom from "@/states/loginAtom";
@@ -53,9 +53,9 @@ export default function ProfileForm() {
     setLoading(true);
     addHostel(values).then((res:any)=>{
       console.log(res);
-      toast({title:res})
+      toast({title:res.message})
+      setLoading(false);
     });
-    setLoading(false);
     router.push("/actions/hostel/hostels")
   }
 
@@ -149,8 +149,8 @@ export default function ProfileForm() {
           
 
           <Button type="submit" disabled={loading} className="w-full">
-            {loading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
             Add
+          {loading && <Loader2 className="animate-spin ml-3"/>}
             
           </Button>
         </form>

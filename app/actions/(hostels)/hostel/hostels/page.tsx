@@ -16,6 +16,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { allocateRooms, getHostels, startAllocation, stopAllocation } from "@/lib/actions/dbActions";
 import adminAtom from "@/states/adminAtom";
 import { Label } from "@radix-ui/react-dropdown-menu";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
@@ -168,7 +169,7 @@ export default function Page() {
           </Card>
           )
         })}
-  
+         {loading && <Loader2 className="animate-spin ml-3"/>}
         {hostels.length == 0 && !loading && <h1 className="text-2xl">No Hostels Found</h1>}
         </div>
       </div>

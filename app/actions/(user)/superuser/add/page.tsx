@@ -105,7 +105,7 @@ export default function SuperUserCreation() {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-2 w-4/5 md:w-1/4 outline-1 p-3"
+          className="space-y-2 w-4/5 md:w-1/4 outline-1 p-3 mb-36"
         >
           <FormDescription className="text-red-500 text-center">This action is not reversible.</FormDescription>
            <FormField
@@ -121,7 +121,10 @@ export default function SuperUserCreation() {
                     <SelectContent>
                       {users && users.map((user:any)=>{
 
-                       return (<SelectItem value={user.userId} key={user.userId}>{user.username}</SelectItem>)
+                       return (<SelectItem value={user.userId} key={user.userId}>
+                        {user.username}
+                        <h1 className="text-[10px] text-gray-400">{user.rollNo}</h1>
+                        </SelectItem>)
                       })}
                       {users.length == 0 && <SelectItem value="null">All are superusers.</SelectItem>}
                      

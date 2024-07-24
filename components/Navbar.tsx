@@ -57,6 +57,10 @@ import { verifyToken } from "@/lib/actions/dbActions";
 import { useToast } from "./ui/use-toast";
 import adminAtom from "@/states/adminAtom";
 import PageLoader from "./Loader";
+import { Skeleton } from "./ui/skeleton";
+import Page from "@/app/actions/(user)/home/page";
+import loadingAtom from "@/states/loadingAtom";
+import ProfileDialog from "./profileDialog";
 
 function CustomLink({
   children,
@@ -72,7 +76,7 @@ function CustomLink({
       className="flex gap-4 items-center cursor-pointer"
       onClick={onClick}
     >
-      <div className="flex gap-4 items-center cursor-pointer">{children}</div>
+      <Link href={href as string} className="flex gap-4 items-center cursor-pointer">{children}</Link>
     </DropdownMenuItem>
   );
 }
@@ -81,6 +85,8 @@ export default function Navbar() {
   const [logged, setLogged] = useRecoilState(loginAtom);
   const [isAdmin, setIsAdmin] = useRecoilState(adminAtom);
   const {toast} = useToast();
+  const router = useRouter();
+  const [loading, setLoading] = useRecoilState(loadingAtom)
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -102,7 +108,22 @@ export default function Navbar() {
     }
   }, []);
 
-  const router = useRouter();
+  //router side effects 
+  useEffect(()=>{
+    //@ts-ignore
+    router.events?.on("routeChangeStart",()=>{setLoading(true)})
+    // @ts-ignore
+    router.events?.on("routeChangeComplete",()=>{setLoading(false)})
+
+    return ()=>{
+      //@ts-ignore
+      router.events?.off("routeChangeStart",()=>{setLoading(true)})
+      //@ts-ignore
+      router.events?.off("routeChangeComplete",()=>{setLoading(false)})
+    }
+  },[router])
+
+  
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -114,47 +135,50 @@ export default function Navbar() {
     <div className="fixed right-0 top-0 pt-5 pr-10 flex items-center justify-end gap-3 w-full backdrop-blur-lg">
       {/* user profile */}
       <ModeToggle />
-      <PageLoader className="w-full min-h-screen fixed top-0 left-0 flex items-center justify-center backdrop-blur-lg bg-white z-20"/>
+      {/* <PageLoader className="w-full z-40 min-h-screen absolute top-0 left-0 flex items-center justify-center"/> */}
       {logged && (
         <DropdownMenu>
           <DropdownMenuTrigger>
-            <Avatar>
+            <Avatar className="absolute z-10">
               <AvatarImage src="https://github.com/shadcn.png" />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
+            <div className="w-10 h-10 rounded-full bg-gray-500"/>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="mr-10 min-h-fit">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <CustomLink onClick={() => router.push("/actions/home")}>
+            <CustomLink href="/actions/home">
               <Home />
               Home
             </CustomLink>
           
-            <CustomLink onClick={() => router.push("/actions/hostel/hostels")}>
-              <Building />
+            <CustomLink href="/actions/hostel/hostels">
+              <Building2 />
               Hostels
             </CustomLink>
-            <CustomLink onClick={() => router.push("/actions/hostel/requests")}>
-              <Building2 /> Hostel Allotment
+            <CustomLink href="/actions/hostel/requests">
+              <Building /> Hostel Allotment
             </CustomLink>
+            {/* <DropdownMenuSeparator /> */}
+            {/* <ProfileDialog/> */}
 
             {isAdmin && <><DropdownMenuSeparator />
 
-            <CustomLink onClick={() => router.push("/actions/superuser/add")}>
+            <CustomLink href="/actions/superuser/add">
               <UserPlus />
               Add SuperUser
             </CustomLink>
-            <CustomLink onClick={() => router.push("/actions/hostel/add")}>
-              <Building2 />
+            <CustomLink href="/actions/hostel/add">
+              <Plus />
               Add Hostel
             </CustomLink>
-            <CustomLink onClick={() => router.push("/actions/wing/add")}>
-              <Building2 />
+            <CustomLink href="/actions/wing/add">
+              <Plus />
               Add Wing
             </CustomLink>
-            <CustomLink onClick={() => router.push("/actions/room/add")}>
-              <Building2 />
+            <CustomLink href="/actions/room/add">
+              <Plus />
               Add Room
             </CustomLink></>}
 

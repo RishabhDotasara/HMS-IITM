@@ -70,7 +70,7 @@ model User {
 
 model Allotment{
   requestId String @id @default(uuid())
-  creatorUserId String
+  creatorUserId String 
   users User[] @relation("Applicants")
   hostelId String
   hostel Hostel @relation("AppliedHostel",fields: [hostelId], references: [hostelId])

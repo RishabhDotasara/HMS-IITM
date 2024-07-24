@@ -202,7 +202,11 @@ export async function createAllotmentRequest(
     //check if user already has an allotment
     const existingRequest = await prisma?.allotment.findFirst({
       where: {
-        creatorUserId: decoded.id,
+        users:{
+          some:{
+            userId:decoded.id
+          }
+        }
       },
     });
 
@@ -334,11 +338,19 @@ export async function addHostel(data: Hostel) {
 
     console.log(hostel);
     await prisma?.$disconnect();
-    return "Hostel added successfully";
+    if (hostel)
+    {
+      return {message:"Hostel added successfully"};
+
+    }
+    else 
+    {
+      return {message:"Error adding hostel!"};
+    }
   } catch (err) {
     console.log(err);
     await prisma?.$disconnect();
-    return "Error on server, please try again!";
+    return {message:"Error on server, please try again!"};
   }
 }
 
@@ -354,26 +366,30 @@ export async function addWing(data: WingCreate) {
     });
 
     if (!existingWing) {
-      await prisma?.wing
+      const wing = await prisma?.wing
         .create({
           data: {
             wingName: data.name,
             hostelId: data.hostel,
           },
         })
-        .then((wing: any) => {
-          console.log(wing);
+        if (wing)
+        {
+          return {status:200, message:"Wing Created!"};
+        }
+        else 
+        {
+          return {status:500, message:"Error creating wing!"};
+        }
 
-          return "Wing Created!";
-        });
     } else {
       await prisma?.$disconnect();
-      return "Wing with name already exists in this hostel!";
+      return {message:"Wing with name already exists in this hostel!"};
     }
   } catch (err) {
     console.log(err);
     await prisma?.$disconnect();
-    return "Error on the server creating a wing!";
+    return {message:"Error on the server creating a wing!"};
   }
 }
 
@@ -389,7 +405,7 @@ export async function addRoom(data: RoomCreate) {
     });
 
     if (!existingRoom) {
-      await prisma?.room
+      const room =  await prisma?.room
         .create({
           data: {
             roomNo: data.name,
@@ -398,10 +414,14 @@ export async function addRoom(data: RoomCreate) {
             capacity: data.capacity,
           },
         })
-        .then((room: any) => {
-          console.log(room);
-          return "Room Created!";
-        });
+        if (room)
+        {
+          return {status:200, message:"Room Created!"};
+        }
+        else 
+        {
+          return {status:500, message:"Error creating room!"};
+        }
     } else {
       await prisma?.$disconnect();
       return "Room with name already exists in this hostel!";
@@ -495,9 +515,7 @@ export async function getTransporter(): Promise<Transporter> {
   //create the transporter using nodemailer
   const transporter = nodemailer.createTransport({
     
-    host: 'smtp-relay.brevo.com',
-    port: 587, // Use 465 for SSL
-    secure: false, // Use true for SSL
+    service:"outlook",
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASSWORD,
@@ -601,16 +619,16 @@ export async function getHtml(username: string, roomNo: string, hostelName: stri
 </html>`;
 }
 
-
 async function sendEmails(requests: any[], transporter: Transporter, hostel: any, failed_emails?: any[]) {
   const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   for (const request of requests) {
+    const roommates = request.users.filter((user: any) => user.userId !== request.creatorUserId);
     for (const user of request.users) {
       const options = {
-        from: process.env.EMAIL_USER,
+        from: "rishabhdotasara@outlook.com",
         to: user.email,
         subject: "Regarding Room Allotment in " + hostel?.hostelName + " Hostel",
-        html: await getHtml(user.username, request.room.roomNo, hostel?.hostelName, request.wing.wingName),
+        html: await getHtml(user.username, request.room.roomNo, hostel?.hostelName, request.wing.wingName, roommates[0]?.username, roommates[1]?.username),
       };
 
       try {
@@ -626,7 +644,6 @@ async function sendEmails(requests: any[], transporter: Transporter, hostel: any
     }
   }
 }
-
 
 
 // actual allocation algorithm, we are going to use first come first serve algo over here for now, we can late introduce new algos,

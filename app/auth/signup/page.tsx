@@ -20,7 +20,7 @@ import Link from "next/link";
 import { toast, useToast } from "@/components/ui/use-toast";
 import { useEffect, useState } from "react";
 import { ButtonLoading } from "@/components/ui/LoadingButton";
-import { Loader } from "lucide-react";
+import { Loader, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRecoilState } from "recoil";
 import loginAtom from "@/states/loginAtom";
@@ -97,17 +97,20 @@ export default function ProfileForm() {
           setLogged(true);
           toast({title:"SignUp Successful!", description:"Welcome to the App."});
           localStorage.setItem('token',res.token);
+          setLoading(false);
           router.push("/actions/home");
         }
         else 
         {
           toast({title:res.message});
+          setLoading(false);
         }
       })
     } catch (err) {
       console.log(err);
+      setLoading(false);
     }
-    setLoading(false);
+    
   }
 
   return (
@@ -316,7 +319,7 @@ export default function ProfileForm() {
             )}
           />
           <Button type="submit" disabled={loading} className="w-full">
-            {loading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
+            {loading && <Loader2 className="animate-spin text-sm ml-3"/>}
             Submit
           </Button>
         </form>

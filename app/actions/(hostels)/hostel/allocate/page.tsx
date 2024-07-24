@@ -19,7 +19,7 @@ import Link from "next/link";
 import { toast, useToast } from "@/components/ui/use-toast";
 import { useEffect, useState } from "react";
 import { ButtonLoading } from "@/components/ui/LoadingButton";
-import { Loader, User } from "lucide-react";
+import { Loader, Loader2, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRecoilState } from "recoil";
 import loginAtom from "@/states/loginAtom";
@@ -37,7 +37,7 @@ import {
   getRoomsbyHostelandWingandCapacity,
   getUserInfo,
   getUsers,
-  getUsersWithoutRequest,
+  
   getWingsbyHostel,
 } from "@/lib/actions/dbActions";
 import { AllotmentRequestSchema } from "@/common/allotmentRequestSchema";
@@ -74,6 +74,14 @@ export default function ProfileForm() {
   const [roomType, setRoomType] = useState(0);
   const [roomates, setRoomates] = useState([]); // lists of users to chose from as roomates
 
+  // Temporary state variables
+  const [tempHostels, setTempHostels] = useState([]);
+  const [tempWings, setTempWings] = useState([]);
+  const [tempRooms, setTempRooms] = useState([]);
+  const [tempRoomates, setTempRoomates] = useState([]);
+  const [optionsLoading, setOptionsLoading] = useState(false);
+
+
   useEffect(()=>{
     getUserInfo(localStorage.getItem("token") || "")
     .then((data: any) => {
@@ -92,6 +100,7 @@ export default function ProfileForm() {
         }
       })
       setRoomates(filtered_users);
+      setTempRoomates(filtered_users)
     })
   },[user])
 
@@ -99,6 +108,7 @@ export default function ProfileForm() {
     getHostelsbyGender(gender).then((data: any) => {
       const alloting_hostels = data.filter((hostel:any)=>hostel.allotmentStatus==true);
       setHostels(alloting_hostels);
+      setTempHostels(alloting_hostels);
     });
     console.log(hostels);
   }, [gender]);
@@ -106,6 +116,7 @@ export default function ProfileForm() {
   useEffect(() => {
     getWingsbyHostel(hostelId).then((data: any) => {
       setWings(data);
+      setTempWings(data);
     });
   }, [hostelId]);
 
@@ -115,6 +126,7 @@ export default function ProfileForm() {
       //filter the eligible rooms
       const eligible_rooms = data.filter((room:any)=>room.appliedStudents.length < room.capacity);
       setRooms(eligible_rooms || []);
+      setTempRooms(eligible_rooms || []);
     });
   }, [roomType]);
 
@@ -126,6 +138,7 @@ export default function ProfileForm() {
       .then((data: any) => {
         
           toast({title:data.message});
+          setLoading(false)
           router.push("/actions/hostel/requests");
         
       })
@@ -133,7 +146,7 @@ export default function ProfileForm() {
         toast({title:"Error creating request"});
         setLoading(false);
       });
-      setLoading(false)
+      
    
   }
 
@@ -142,7 +155,7 @@ export default function ProfileForm() {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-2 w-4/5 md:w-1/4 outline-1 p-3 mt-16"
+          className="space-y-2 w-4/5 md:w-1/4 outline-1 p-3 -mt-8"
         >
           <h3 className="text-center text-2xl font-bold">Create a new request</h3>
 
@@ -189,14 +202,16 @@ export default function ProfileForm() {
                       <SelectValue placeholder="Hostel" />
                     </SelectTrigger>
                     <SelectContent>
-                      {hostels.length > 0 && hostels.map((hostel: any) => {
+                      {tempHostels.length > 0 && hostels.map((hostel: any) => {
                         return (
                           <SelectItem value={hostel.hostelId} key={hostel.hostelId}>
                             {hostel.hostelName}
                           </SelectItem>
                         );
                       })}
-                      {hostels.length == 0 && <SelectItem value="No one">No hostel is accepting.</SelectItem>}
+                      {!gender && <SelectItem value="No one">Please select a gender first.</SelectItem>}
+                      {gender && optionsLoading && <SelectItem value="No one">Loading Hostels...</SelectItem>}
+                      {gender && !loading && hostels.length == 0 && <SelectItem value="No one">No Hostels alloting..</SelectItem>}
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -221,14 +236,15 @@ export default function ProfileForm() {
                       <SelectValue placeholder="Wing" />
                     </SelectTrigger>
                     <SelectContent>
-                      {wings.length > 0 && wings.map((wing: any) => {
+                      {tempWings.length > 0 && wings.map((wing: any) => {
                         return (
                           <SelectItem value={wing.wingId} key={wing.wingId}>
                             {wing.wingName}
                           </SelectItem>
                         );
                       })}
-                      {wings.length == 0 && <SelectItem value="No one">Please select a hostel first.</SelectItem>}
+                      {!hostelId && <SelectItem value="No one">Please select a hostel first.</SelectItem>}
+                      {wings.length == 0 && hostelId && <SelectItem value="No one">Loading Wings...</SelectItem>}
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -244,7 +260,7 @@ export default function ProfileForm() {
               <FormItem>
                 <FormLabel>Room Type</FormLabel>
                 <FormControl>
-                  <Select onValueChange={(e: string) => {field.onChange(e), setRoomType(e)}}>
+                  <Select onValueChange={(e: string) => {field.onChange(e), setRoomType(parseInt(e))}}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Room" />
                     </SelectTrigger>
@@ -279,14 +295,16 @@ export default function ProfileForm() {
                     <SelectValue placeholder="Room" />
                   </SelectTrigger>
                   <SelectContent>
-                    {rooms.length > 0 && rooms.map((room: any) => {
+                   
+                    {tempRooms.length > 0 && rooms.map((room: any) => {
                       return (
                         <SelectItem value={room.roomId} key={room.roomId}>
                           {room.roomNo}
                         </SelectItem>
                       );
                     })}
-                    {rooms.length == 0 && <SelectItem value="No one">Please select a wing first.</SelectItem>}
+                    {!wingId && <SelectItem value="No one">Please select a wing first.</SelectItem>}
+                    {wingId && rooms.length == 0 && <SelectItem value="No one">Loading Rooms...</SelectItem>}
                   </SelectContent>
                 </Select>
               </FormControl>
@@ -307,7 +325,7 @@ export default function ProfileForm() {
                       <SelectValue placeholder="User" />
                     </SelectTrigger>
                     <SelectContent>
-                      {roomates.length > 0 && roomates.map((roommate: any) => {
+                      {tempRoomates.length > 0 && roomates.map((roommate: any) => {
                         return (
                           <SelectItem value={roommate.userId} key={roommate.userId}>
                             <h3>{roommate.username}</h3>
@@ -337,7 +355,7 @@ export default function ProfileForm() {
                       <SelectValue placeholder="User" />
                     </SelectTrigger>
                     <SelectContent>
-                    {roomates.length > 0 && roomates.map((roommate: any) => {
+                    {tempRoomates.length > 0 && roomates.map((roommate: any) => {
                         return (
                           <SelectItem value={roommate.userId} key={roommate.userId}>
                             <h3>{roommate.username}</h3>
@@ -356,8 +374,8 @@ export default function ProfileForm() {
             )}
           />}
           <Button type="submit" disabled={loading} className="w-full">
-            {loading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
             Create
+            {loading && <Loader2 className="animate-spin ml-3"/>}
           </Button>
         </form>
       </Form>
