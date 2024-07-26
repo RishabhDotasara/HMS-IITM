@@ -87,7 +87,7 @@ export default function ProfileForm() {
               <FormItem className="w-100">
                 <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="A" {...field} />
+                  <Input placeholder="A,B,C" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

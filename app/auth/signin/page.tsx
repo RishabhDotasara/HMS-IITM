@@ -82,7 +82,7 @@ export default function ProfileForm() {
           <div className="text-gray-400">
             <p className="text-center">
               Don&apos;t have an account?
-              <Link href="/auth/signup" className="dark:hover:text-white">
+              <Link href="/auth/signup" className="dark:hover:text-white ml-1 hover:underline">
                 Create!
               </Link>
             </p>

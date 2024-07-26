@@ -120,17 +120,20 @@ export default function ProfileForm() {
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-2 w-4/5 md:w-1/4 outline-1 p-3 mt-16"
         >
-          <h3 className="text-center text-2xl font-bold">Create Account</h3>
+          <h3 className="text-center text-2xl font-bold">Welcome to Hostel Management</h3>
           <FormDescription className="text-center">
-            <span className="text-center">
+          <div className="text-gray-400">
+            <p className="text-center">
               Already have an account?
-              <Link href="/auth/signin" className="hover:text-white">
-                Login
+              <Link href="/auth/signin" className="dark:hover:text-white ml-1 hover:underline">
+                SignIn!
               </Link>
-            </span>
-            <h2 className="text-red-500">
+            </p>
+          </div>
+            <br></br>
+            <span className="text-red-500 ">
               Fill info carefully. Not editable afterwards!
-            </h2>
+            </span>
           </FormDescription>
           <FormField
             control={form.control}
@@ -247,9 +250,13 @@ export default function ProfileForm() {
                     <SelectContent>
                       {hostels.map((hostel: any) => {
                         return (
+                          <>
                           <SelectItem value={hostel.hostelId} key={hostel.hostelId}>
                             {hostel.hostelName}
                           </SelectItem>
+                          {!gender && <SelectItem value="No One">Please select a gender!</SelectItem>}
+                          </>
+                          
                         );
                       })}
                     </SelectContent>

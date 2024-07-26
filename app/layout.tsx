@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -8,8 +8,27 @@ import { ModeToggle } from "@/components/ModeToggle";
 import { Toaster } from "@/components/ui/toaster";
 import { RecoilRoot, useRecoilValue } from "recoil";
 import Navbar from "@/components/Navbar";
-
-
+import {
+  BarChartIcon,
+  BellIcon,
+  BookIcon,
+  CalendarIcon,
+  CirclePlusIcon,
+  Loader2,
+  MenuIcon,
+  PlusCircleIcon,
+  PlusIcon,
+  UsersIcon,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import Link from "next/link";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,24 +42,22 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
-  
   return (
     <html lang="en">
       <body className={inter.className}>
-      <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem={true}
-            disableTransitionOnChange={false}
-          >
-        <RecoilRoot>
-          
-          {children}
-        </RecoilRoot>
-        <Toaster/>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem={true}
+          disableTransitionOnChange={false}
+        >
+          <RecoilRoot>
+            <Navbar />
+           {children}
+          </RecoilRoot>
+          <Toaster />
         </ThemeProvider>
-        </body>
+      </body>
     </html>
   );
 }

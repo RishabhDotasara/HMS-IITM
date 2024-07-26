@@ -229,7 +229,7 @@ export async function createAllotmentRequest(
     if (!existingRequest && hostel?.allotmentStatus) {
       const request = await prisma?.allotment.create({
         data: {
-          creatorUserId: decoded.id,
+          creatorUserId: decoded.username,
           wingId: data.wingId,
           roomId: data.roomId,
           hostelId: data.hostelId,
@@ -357,7 +357,8 @@ export async function addHostel(data: Hostel) {
 export async function addWing(data: WingCreate) {
   try {
     //the admin check can further be enchanced by taking token as the input and checking if it is admin executing the operation.
-    //check if the wing with same name already exists
+    //check if the wing with same name already exists\
+    console.log(data);
     const existingWing = await prisma?.wing.findFirst({
       where: {
         wingName: data.name,
@@ -524,6 +525,7 @@ export async function getTransporter(): Promise<Transporter> {
 
   return transporter;
 }
+
 export async function getHtml(username: string, roomNo: string, hostelName: string, wing: string, roommate1?: string, roommate2?: string) {
   return `<!DOCTYPE html>
 <html lang="en">
